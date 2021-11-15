@@ -50,6 +50,7 @@ function buildNav() {
 
   for (const section of sections) {
     const li = document.createElement('li');
+    li.classList.add('menu__link');
     // const a = document.createElement('a');
     li.textContent = section.dataset.nav;
     sectionObj[section.dataset.nav] = section.id;
