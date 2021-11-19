@@ -8,12 +8,41 @@ let header = document.querySelector('.page__header');
 // Helper Functions
 function isInViewport(element) {
   const rect = element.getBoundingClientRect();
-  return (
-      rect.top >= 0 &&
-      rect.left >= 0 &&
-      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-  );
+  let inView;
+
+  function checkPercentage(inView, windowHeight) {
+    if ((inView / windowHeight) * 100 > 51) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  if (rect.bottom < 0) {
+    return false;
+  }
+
+  if (rect.top > window.innerHeight) {
+    return false;
+  }
+
+  if (rect.top < 0 && rect.bottom > window.innerHeight) {
+    return true;
+  }
+
+  if (rect.top < 0 && rect.bottom < window.innerHeight) {
+    inView = rect.bottom;
+  }
+
+  if (rect.top > 0 && rect.bottom > window.innerHeight) {
+    inView = window.innerHeight - rect.top;
+  }
+
+  if (rect.top > 0 && rect.bottom < window.innerHeight) {
+    inView = rect.bottom - rect.top;
+  }
+
+  return checkPercentage(inView, window.innerHeight);
 }
 
 // Main Functions
@@ -31,11 +60,24 @@ function buildNav() {
   navBar.appendChild(fragment);
 }
 
+// Highlight section name in navbar based on viewport
+function highlight(element) {
+  const menuLinks = document.querySelectorAll('.menu__link')
+  for (const menuLink of menuLinks) {
+    if (menuLink.textContent === element.dataset.nav) {
+      menuLink.classList.add('highlight');
+    } else {
+      menuLink.classList.remove('highlight');
+    }
+  }
+}
+
 // Add class 'active' to section when near top of viewport
 function addClassActive(elements) {
   for (const element of elements) {
     if (isInViewport(element)) {
       element.classList.add('your-active-class');
+      highlight(element);
     } else {
       element.classList.remove('your-active-class');
     }
@@ -44,30 +86,27 @@ function addClassActive(elements) {
 
 // Scroll to anchor ID using scrollTO event
 function scroll(element) {
-  highlighted.classList.remove('highlight');
-  highlighted = element;
-  element.classList.add('highlight');
   const id = sectionObj[element.innerText];
   const clickedSection = document.getElementById(id);
-  clickedSection.scrollIntoView({behavior:'smooth'});
+  clickedSection.scrollIntoView({ behavior: 'smooth' });
 }
 
 // Events
 function setActive() {
-  document.addEventListener('scroll', () => {addClassActive(sections)});
+  document.addEventListener('scroll', () => { addClassActive(sections) });
 }
 
 function hideNavbar() {
   document.addEventListener('scroll', () => {
     header.classList.remove('scroll-not-active')
-    setTimeout(() => {header.classList.add('scroll-not-active')}, 5000);
+    setTimeout(() => { header.classList.add('scroll-not-active') }, 5000);
   })
 }
 
 function scrollToSection() {
   navBar.addEventListener('click',
-  (e) => {e.target.nodeName === 'LI' ? scroll(e.target) : null}
-);
+    (e) => { e.target.nodeName === 'LI' ? scroll(e.target) : null }
+  );
 }
 
 // Build menu
